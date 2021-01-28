@@ -1,24 +1,24 @@
 import React from 'react'
 import axios from 'axios'
-import {Button, Modal, Card, Table, Form} from 'react-bootstrap'
-
+import {Button,Modal, Table, Card, Form} from 'react-bootstrap' 
 
 class Pegawai extends React.Component {
-    constructor(){
-        super();
-        this.state = {
+    constructor() {  
+        super();  
+        this.state = {  
             pegawai: [],
-            id_pegawai: "",  
-            nama_pegawai: "",  
-            alamat: "",  
-            action: "", 
-            search: '',
-            isModalOpen: false,
-        }
+            id_pegawai: "",
+            nama_pegawai: "",
+            alamat: "",
+            search: "",
+            action: "",
+          isModalOpen: false
+        }  
     }
     bind = (event) => {
         this.setState({[event.target.name]: event.target.value});
     }
+
     handleAdd = () => {
         this.setState({
             id_pegawai: "",
@@ -37,36 +37,11 @@ class Pegawai extends React.Component {
             isModalOpen: true
         })
     }
-    getPegawai = () => {
-        let url = "http://localhost:3000/pegawai";
-        // mengakses api untuk mengambil data pegawai
-        axios.get(url)
-        .then(response => {
-          // mengisikan data dari respon API ke array pegawai
-          this.setState({pegawai: response.data.pegawai});
+
+    handleClose = () => {
+        this.setState({
+            isModalOpen: false
         })
-        .catch(error => {
-          console.log(error);
-        });
-    }
-    findPegawai = (event) => {
-        let url = "http://localhost:3000/pegawai/find";
-        if (event.keyCode === 13) {
-        //   menampung data keyword pencarian
-          let form = {
-            find: this.state.search
-          }
-          // mengakses api untuk mengambil data pegawai
-          // berdasarkan keyword
-          axios.post(url, form)
-          .then(response => {
-            // mengisikan data dari respon API ke array pegawai
-            this.setState({pegawai: response.data.pegawai});
-          })
-          .catch(error => {
-            console.log(error);
-          });
-        }
     }
     handleSave = (event) => {
         event.preventDefault();
@@ -74,9 +49,9 @@ class Pegawai extends React.Component {
         ke dalam FormData() untuk dikirim  */
         let url = "";
         if (this.state.action === "insert") {
-          url = "http://localhost:3000/pegawai/save"
+          url = "http://localhost:2000/pegawai/save"
         } else {
-          url = "http://localhost:3000/pegawai/update"
+          url = "http://localhost:2000/pegawai/update"
         }
     
         let form = {
@@ -94,13 +69,50 @@ class Pegawai extends React.Component {
         .catch(error => {
           console.log(error);
         });
-        // menutup form modal
+
         this.setState({
             isModalOpen: false
         })
     }
+    
+    
+    getPegawai = () => {
+        let url = "http://localhost:2000/pegawai";
+        // mengakses api untuk mengambil data pegawai
+        axios.get(url)
+        .then(response => {
+          // mengisikan data dari respon API ke array pegawai
+          this.setState({pegawai: response.data.pegawai});
+        })
+        .catch(error => {
+          console.log(error);
+        });
+    }
+    componentDidMount(){
+        // method yang pertama kali dipanggil pada saat load page
+        this.getPegawai()
+    }
+    findPegawai = (event) => {
+        let url = "http://localhost:2000/pegawai";
+        if (event.keyCode === 13) {
+        //   menampung data keyword pencarian
+          let form = {
+            find: this.state.search
+          }
+          // mengakses api untuk mengambil data pegawai
+          // berdasarkan keyword
+          axios.post(url, form)
+          .then(response => {
+            // mengisikan data dari respon API ke array pegawai
+            this.setState({pegawai: response.data.pegawai});
+          })
+          .catch(error => {
+            console.log(error);
+          });
+        }
+    }
     Drop = (id_pegawai) => {
-        let url = "http://localhost:3000/pegawai/" + id_pegawai;
+        let url = "http://localhost:2000/pegawai/" + id_pegawai;
         // memanggil url API untuk menghapus data pada database
         if (window.confirm('Apakah Anda yakin ingin menghapus data ini?')) {
           axios.delete(url)
@@ -113,14 +125,12 @@ class Pegawai extends React.Component {
           });
         }
     }
-    componentDidMount(){
-        // method yang pertama kali dipanggil pada saat load page
-        this.getPegawai()
-    }
+
     render(){
+        console.log(this.state.pegawai)
         return(
             <>
-                <Card>
+            <Card>
                 <Card.Header className="card-header bg-info text-white" align={'center'}>Data Pegawai</Card.Header>
                 <Card.Body>
                 <input type="text" className="form-control mb-2" name="search" value={this.state.search} onChange={this.bind} onKeyUp={this.findPegawai} placeholder="Pencarian..." />
@@ -160,13 +170,14 @@ class Pegawai extends React.Component {
                 </Card.Body>
                 </Card>
 
-                <Modal show={this.state.isModalOpen} onHide={this.handleSave}>
+                
+                <Modal show={this.state.isModalOpen} onHide={this.handleClose}>
                     <Modal.Header closeButton>
                     <Modal.Title>Form Pegawai</Modal.Title>
                     </Modal.Header>
-                    <form onSubmit={this.handleSave}>  
-                    <div className="modal-body">  
-                        NIP  
+                    <Form onSubmit={this.handleSave}>
+                    <Modal.Body>
+                        ID 
                         <input type="number" name="id_pegawai" value={this.state.id_pegawai} onChange={this.bind}  
                         className="form-control" required />  
                         Nama  
@@ -175,17 +186,19 @@ class Pegawai extends React.Component {
                         Alamat  
                         <input type="text" name="alamat" value={this.state.alamat} onChange={this.bind}  
                         className="form-control" required />  
-                    </div>  
-                    <div className="modal-footer">  
-                        <button className="btn btn-sm btn-success" type="submit">  
+
+                    </Modal.Body>
+                    <Modal.Footer>
+                    <button className="btn btn-sm btn-success" type="submit">  
                             Simpan  
                         </button>  
-                    </div>  
-                    </form> 
+
+                    </Modal.Footer>
+                    </Form>
                 </Modal>
             </>
-        )
-    }
+    );  
+  }
 }
 
 export default Pegawai
